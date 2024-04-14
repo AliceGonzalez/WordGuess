@@ -1,97 +1,123 @@
 package com.github.zipcodewilmington;
-
 import java.util.Random;
 import java.util.Scanner;
 
 public class Wordguess {
     // instance variables go here
-    int allowedTries = 0;
+    char[] guesses;
+    int allowedTries = 6;
     int currentTries = 0;
+    String secretWord = "";
+    char[] wordArray;
 
     // set up a list (array) of strings of words
     String[] wordList = {"java", "void", "code", "list", "file", "game", "play", "word", "path", "push", "pull"};
 
-
-    private void announceGame(){System.out.println("Welcome!\nLet's play Wordguess version 10.0!");
+    public static void main(String[] args) {
+        Wordguess game = new Wordguess();
+        game.runGame();
     }
 
-    private void gameOver(){System.out.print("GAME OVER!");
+    private void announceGame() {
+        System.out.println("Welcome!\nLet's play Wordguess version 10.0!");
     }
 
-    private void initializeGameSlate(){
-        //sets up char[] for secret word and guesses
+    private void gameOver() {
+        System.out.println("GAME OVER! Try again.");
     }
 
-    private char getNextGuess(char userGuess){
-        //returns a char from player input
-        Scanner nextGuess = new Scanner(System.in);
-        System.out.print("Enter a single character:");
-        //char nextGuess = Scanner.nextLine();
-        return userGuess;
+    private void initializeGameSlate() {
+        guesses = new char[secretWord.length()];
+        for (int i = 0; i < secretWord.length(); i++) {
+            guesses[i] = '_';
+        }
     }
 
-    private boolean isWordGuessed(boolean guessedWord){
-        //returns boolean
-        return guessedWord;
+    private char getNextGuess() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter a single character: ");
+        String input = scanner.nextLine();
+
+        if (input.length() == 1) {
+            char letter = input.charAt(0);
+            if (Character.isLetter(letter)) {
+                return letter;
+            }
+        }
+        return 0; // Returns 0 if input is invalid
     }
 
-    private boolean askToPlayAgain(boolean userAnswer){
-        Scanner ask_to_play = new Scanner(System.in);
-        System.out.print("Would you like to play again?");
-        //boolean ask_to_play = Scanner.nextLine();
-       return userAnswer;
+    private boolean isWordGuessed() {
+        for (int i = 0; i < guesses.length; i++) {
+            if (guesses[i] != wordArray[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    private void printCurrentSlate(){
-        //uses printArray to show player where they are at
+    private boolean askToPlayAgain() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Would you like to play again? (yes/no) ");
+        String userInput = scanner.nextLine();
+        return userInput.equalsIgnoreCase("yes");
     }
 
-    private void process(){
-        //loops trhu the word array, looking for the inputed guess, and replaces the _ with the guessses char if found
+    private void printCurrentSlate() {
+        for (char guess : guesses) {
+            System.out.print(guess + " ");
+        }
+        System.out.println();
     }
 
-    private void playerWon(){System.out.println("You guessed the secret word!\nCongratulations! :)");
+    private void process(char nextGuess) {
+        boolean guessFound = false;
+        for (int i = 0; i < secretWord.length(); i++) {
+            if (wordArray[i] == nextGuess && guesses[i] == '_') {
+                guesses[i] = nextGuess;
+                guessFound = true;
+            }
+        }
+        if (!guessFound) {
+            currentTries++;
+        }
     }
 
-    private void playerLost(){System.out.println("You lost :(");
+    private void playerWon() {
+        System.out.println("You guessed the secret word!\nCongratulations! :)");
     }
 
-    public void runGame(){//choose random word from list below
+    private void playerLost() {
+        System.out.println("You lost :(\nThe word was: " + secretWord);
+    }
+
+    public void runGame() {
         Random random = new Random();
-        int randomIndex = random.nextInt(wordList.length);
-        String randomString = wordList[randomIndex]; //Use randomString
+        secretWord = wordList[random.nextInt(wordList.length)];
+        wordArray = secretWord.toCharArray();
+        initializeGameSlate();
 
+        do {
+            announceGame();
+            while (!isWordGuessed() && currentTries < allowedTries) {
+                printCurrentSlate();
+                char nextGuess = getNextGuess();
+                if (nextGuess != 0) {
+                    process(nextGuess);
+                } else {
+                    System.out.println("Invalid input. Please enter a valid letter.");
+                }
+            }
+            if (isWordGuessed()) {
+                playerWon();
+            } else {
+                playerLost();
+            }
+            currentTries = 0;  // Reset tries for next game
+            initializeGameSlate();  // Reset game state
+        } while (askToPlayAgain());
 
-
-//        while (you want to play) { //outer loop
-        announceGame();
-//            set word guessed to false
-//            while (the word isn't guessed) { //inner loop
-//            print the current game state
-//            ask for a guess (a single letter)
-//
-//            check the letter against the word
-//            using the two character arrays discussed above
-//            increment the number of guesses
-//
-//            if the word is guessed
-        playerWon();
-//
-//            if too many guesses
-        playerLost();
-//        }
-//        ask if player wants to play again
-
-
-//    }
         gameOver();
-
-    }
-
-
-
-    public static void main(String[] args){
-        Wordguess game1 = new Wordguess();
-        game1.runGame();
     }
 }
+
